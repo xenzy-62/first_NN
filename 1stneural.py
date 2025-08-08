@@ -1,24 +1,31 @@
 import numpy as np
 from PIL import Image
+from pathlib import Path
 
 i = 0
 exit = "c"
 clac_percent = 0
 savemaybe = "b"
+batch_size = 1000000
 
 def save_model():
     name = input("enter model name: ")
-    np.save(name + "weights1.npy" , weights1 )
-    np.save(name + "weights2.npy" , weights2 )
-    np.save(name + "weights3.npy" , weights3 )
-    np.save(name + "b1.npy" , b1 )
-    np.save(name + "b2.npy" , b2 )
-    np.save(name + "b3.npy" , b3 )
+
+    script_path = Path(__file__).parent 
+    new_folder = script_path / "models" / name
+    new_folder.mkdir(exist_ok=True) 
+
+    np.save(new_folder / "weights1.npy" , weights1 )
+    np.save(new_folder / "weights2.npy" , weights2 )
+    np.save(new_folder / "weights3.npy" , weights3 )
+    np.save(new_folder / "b1.npy" , b1 )
+    np.save(new_folder / "b2.npy" , b2 )
+    np.save(new_folder / "b3.npy" , b3 )
 
 def load_model():
 
-    name = input("enter model name: ")
-    return np.load("C:\\code\\py\\"+ name +"weights1.npy") , np.load("C:\\code\\py\\"+ name +"weights2.npy" ) , np.load("C:\\code\\py\\"+ name +"weights3.npy" ) , np.load("C:\\code\\py\\"+ name +"b1.npy" ) ,np.load("C:\\code\\py\\"+ name +"b2.npy" ) , np.load("C:\\code\\py\\"+ name +"b3.npy" ) 
+    name = input("enter model path: ")
+    return np.load( name + "\\" +"weights1.npy") , np.load( name + "\\" +"weights2.npy" ) , np.load( name + "\\" +"weights3.npy" ) , np.load( name + "\\" +"b1.npy" ) ,np.load( name + "\\" +"b2.npy" ) , np.load( name + "\\" +"b3.npy" ) 
     
 
 
@@ -51,13 +58,13 @@ def get_example(img_path):
 
 def get_examples(dataset):
     
-    data = np.zeros((28*28,1000000))
-    data_label = np.zeros(1000000)
-    for i in range(1000000):
+    data = np.zeros((28*28,batch_size))
+    data_label = np.zeros(batch_size)
+    for i in range(batch_size):
         number = np.random.randint(0,9)
-        data[:,i] = get_example( dataset +"\\"+ str(number) +"\\"+ str(number) + "\\" + str(np.random.randint(0,10000))+ ".png")
+        data[:,i] = get_example( dataset / (str(number) +"\\"+ str(number) + "\\" + str(np.random.randint(0,10000))+ ".png"))
         data_label [i] = number  
-        print( "data loaded percentage: " +str(i/10000)) 
+        print( "data loaded percentage: " +str(i/(batch_size/100))) 
     return data , data_label    
 
 def delta_b(pre_deltas , cur_layer , weights ):
@@ -82,7 +89,7 @@ def derive(deltas , pre_activations , act_num ) :
 
 
 
-batch_size = 1000000
+
 
 learning_rate = 0.1
 
@@ -122,7 +129,8 @@ predection= np.zeros(num)
 picture = np.zeros(28*28)
 batch = 1
 if savemaybe != "y":
-    data , data_label = get_examples("C:\\Users\\hassa\\.cache\\kagglehub\\datasets\\jcprogjava\\handwritten-digits-dataset-not-in-mnist\\versions\\4\\dataset")
+    datasett = Path(__file__).parent
+    data , data_label = get_examples( datasett / "dataset\\handwritten-digits-dataset-not-in-mnist\\versions\\4\\dataset")
     while i == 0 :
 
         clac_percent = 0
@@ -171,7 +179,7 @@ if savemaybe != "y":
         print( "cost value: " + str(np.sum(error/100)))
         print( "model accuracy percentage: " + str(percentage))
         avg_error = np.sum(error)/100
-        if np.sum(avg_error) < 0.1 or percentage > 97 : 
+        if np.sum(avg_error) < 0.1 or percentage > 1 : 
             i +=1
         else :
             weights1 = weights1 -(learning_rate * weights1_ders/100) 
@@ -193,8 +201,7 @@ while exit != '0' :
     picture_test = input("enter number path")
 
 
-    test=get_example(picture_test)
-    good = get_example("C:\\Users\\hassa\\.cache\\kagglehub\\datasets\\jcprogjava\\handwritten-digits-dataset-not-in-mnist\\versions\\4\\dataset\\4\\4\\8.png")
+    test=get_example_p(picture_test)
     layer1 , layer2 , predection=evaluate(test,layer1, layer2 , weights1 , weights2 , weights3 , b1 , b2 , b3)
     print(predection)
     decision = 0
