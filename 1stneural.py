@@ -115,9 +115,8 @@ def load_model():
 
 
 def sigmoid(z):
-    #z = np.clip(z, -50, 50)  # Prevents overflow
-    #1 / (1 + np.exp(-z))
-    return np.maximum(0,z) 
+    z = np.clip(z, -50, 50)  # Prevents overflow
+    return 1 / (1 + np.exp(-z))
 
 def evaluate( input , layer1 , layer2 , weights1 , weights2 , weights3 , b1 , b2 , b3  ):
     z1=np.dot( weights1 , input  ) + b1
@@ -129,7 +128,7 @@ def evaluate( input , layer1 , layer2 , weights1 , weights2 , weights3 , b1 , b2
     z3=np.dot( weights3 , layer2 ) + b3
      
 
-    return np.softmax(z3)
+    return sigmoid(z3)
 
 def evaluate_t( input , layer1 , layer2 , weights1 , weights2 , weights3 , b1 , b2 , b3  ):
 
@@ -143,7 +142,7 @@ def evaluate_t( input , layer1 , layer2 , weights1 , weights2 , weights3 , b1 , 
 
     z3=np.dot( weights3 , layer2 ) + b3[: , np.newaxis]
 
-    return layer1 , layer2 , np.softmax(z3)
+    return layer1 , layer2 , sigmoid(z3)
 
 
 
